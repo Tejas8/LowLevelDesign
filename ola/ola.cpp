@@ -1,6 +1,7 @@
 #include<bits/stdc++.h>
 using namespace  std;
 
+
 class Person{
 public:
      string name;
@@ -80,18 +81,20 @@ int Ride::calculateAmt(bool ispriority){
  return amt;
 }
 class Rider: private Person{
-private: 
-vector<Ride>completedRide;
+private:
+     int id;
+
+vector<Ride>allRide;
  Ride currentRide;
 public:
-Rider(string);
+Rider(int,string);
 void createRide(int,int,int,int);
 void updateRide(int,int,int,int);
 void withdraw(int);
 int closeRide();
-vector<Ride>getCompletedRide(){
-     return completedRide;
-}
+
+int getId() const { return id; }
+void setId(int id_) { id = id_; }
 };
 void Rider::createRide(int id,int origin,int destination,int seats){
      if(origin>destination){
@@ -133,28 +136,87 @@ int Rider::closeRide(){
       return 0;
  }
  currentRide.setRideStatus(RideStatus::COMPLETED);
- completedRide.push_back(currentRide);
- return currentRide.calculateAmt(completedRide.size()>=10);  
+ allRide.push_back(currentRide);
+ return currentRide.calculateAmt(allRide.size()>=10);  
 
 }
 
-Rider::Rider(string  name){
+Rider::Rider(int id,string  name){
 this->name=name;
+this->id=id;
 }
 
 class Driver:private Person{
 Driver(string);
-};
+};    
 Driver:: Driver(string name){
 this->name=name;
 }
 
+class System{
+     private:
+          int drivers;
+          vector<Rider>riders;
+     public:
+     System(int,vector<Rider>&);  
+     void createRide(int,int,int,int,int);
+     void updateRide(int,int,int,int,int);
+     void withdraw(int,int);
+     int closeRide(int);
 
+};
 
+System::System(int drivers, vector<Rider>& riders){
 
+     if(drivers<2||riders.size()<2){
+          cout<<"Not enough drivers or riders\n";
+     }
+     this->drivers=drivers;
+     this->riders=riders;
+
+}
+void System::createRide(int Rider_id,int id,int origin,int destination,int seats){
+     if(drivers==0){
+          cout<<"Creating a ride not possible because driver is  not present\n";
+          return;
+     }
+     for(auto i:riders){
+          if(i.getId()==Rider_id){
+            i.createRide(id,origin,destination,seats);
+            drivers--;
+            break;
+          }
+     }                      
+}
+void System::updateRide(int Rider_id,int id,int origin,int destination,int seats){
+     
+     for(auto i:riders){
+          if(i.getId()==Rider_id){
+            i.updateRide(id,origin,destination,seats);
+            break;
+          }
+     }                      
+}
+void System::withdraw(int Rider_id,int id){
+     
+     for(auto i:riders){
+          if(i.getId()==Rider_id){
+            i.withdraw(id);
+            drivers++;
+            break;
+          }
+     }                      
+}
+int System::closeRide(int Rider_id){
+     
+     for(auto i:riders){
+          if(i.getId()==Rider_id){
+            drivers++;
+            return i.closeRide();
+          }
+     } 
+     return 0;                     
+}
 int main(){
-Rider rider("Tejas");
-rider.createRide(1,3,20,2);
-cout<<rider.closeRide();
-rider.closeRide();
+
 }
